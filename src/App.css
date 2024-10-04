@@ -98,6 +98,17 @@ form button{
      color: #fff;
 }
 
+form button:hover{
+    background-color: #04bb44;
+}
+
+form button:disabled {
+    background-color: #cccccc;  /* A lighter, muted color */
+    color: #666666;  /* Dimmed text color */
+    cursor: not-allowed;  /* Disabled cursor */
+    opacity: 0.6;  /* Slight transparency to indicate disabled state */
+}
+
 label{
     font-size: 1.5rem;
     letter-spacing: .06rem;
@@ -109,36 +120,72 @@ label{
 /*todo task list */
 /*====================*/
 
-.main-task li{
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+.header {
+    display: flex;
     align-items: center;
-    width:50rem;
+    font-size: 3rem;
+    font-weight: bold;
+    color: #333;
+    gap: 1rem; /* Adding space between icon and text */
+    padding-bottom: 1rem;
+    margin-bottom: 12px;
+  }
+  
+  .header-icon {
+    font-size: 3.5rem;
+    color: #d14d72; /* Icon color (pink for contrast) */
+  }
+
+.main-task li {
+    display: grid;
+    grid-template-columns: 0.1fr 2fr 2fr 1fr; /* Adjusted to give more space to task and date */
+    align-items: center;
+    width: 50rem;
     min-height: 6rem;
-    border-bottom: .1rem solid #ccc;
+    border-bottom: 0.1rem solid #ccc;
 }
 
-.main-task li:first-child{
-    border-top: .1rem solid #ccc;
+.main-task li:first-child {
+    border-top: 0.1rem solid #ccc;
 }
 
-.main-task li:hover{
+.main-task li:hover {
     background-color: #fef2f2;
 }
 
-.main-task li input[type="checkbox"]:checked  + label {
+.main-task li input[type="checkbox"]:checked + label {
     text-decoration: line-through;
     color: #D14D72;
 }
 
-.main-task li button{
-    padding: .6rem 1rem;
+.main-task li label {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    padding: 0 1rem;
+    max-width: 100%; /* Ensures it doesn't overflow outside */
+}
+
+
+.main-task li button {
+    padding: 0.6rem 1rem;
     width: 7rem;
-    background-color: #D14D72;
+    background-color: #d33461;
     color: #FFF9F9;
-    border:none;
+    border: none;
     display: inline-block;
     cursor: pointer;
     justify-self: center;
-    letter-spacing: .1rem;
+    letter-spacing: 0.1rem;
+}
+
+.main-task li button:hover {
+    background-color: #b40036;
+}
+
+.main-task li label {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    padding: 0 1rem;
 }
