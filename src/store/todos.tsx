@@ -1,88 +1,90 @@
-import { ReactNode, createContext, useContext, useState } from "react";
+import { ReactNode, createContext, useContext, useState, useEffect, useCallback, useMemo } from "react";
 
 export type TodosProviderProps = {
-    children : ReactNode
+    children: ReactNode;
 }
 
 export type Todo = {
-    id:string;
-    task:string;
-    completed:boolean;
-    createdAt:Date;
+    id: string;
+    task: string;
+    completed: boolean;
+    createdAt: Date;
 }
 
-export type TodosContext = {
-    todos:Todo[];
-    handleAddToDo:(task:string) => void; // call signature
-    toggleTodoAsCompleted:(id:string) => void; 
-    handleDeleteTodo:(id:string) => void;
+export type TodosContextType = {
+    todos: Todo[];
+    handleAddToDo: (task: string) => void;
+    toggleTodoAsCompleted: (id: string) => void;
+    handleDeleteTodo: (id: string) => void;
 }
 
-export const todosContext = createContext<TodosContext | null >(null)
+// Create context with a default null value
+const TodosContext = createContext<TodosContextType | null>(null);
 
-export const TodosProvideer = ({children}:TodosProviderProps) => {
-
-    const[todos, setTodos] = useState<Todo[]>(() => {
+export const TodosProvider = ({ children }: TodosProviderProps) => { // Fixed the typo here
+    const [todos, setTodos] = useState<Todo[]>(() => {
         try {
-            const newTodos = localStorage.getItem("todos") || "[]";
-            return JSON.parse(newTodos) as Todo[]
+            const storedTodos = localStorage.getItem("todos");
+            return storedTodos ? JSON.parse(storedTodos) : [];
         } catch (error) {
-            return []
+            console.error("Failed to load todos from localStorage", error);
+            return [];
         }
-    })
+    });
 
-    const handleAddToDo = (task:string) => {
-        setTodos((prev) =>{
-          const newTodos:Todo[] = [
+    // Persist todos to localStorage whenever the todos change
+    useEffect(() => {
+        try {
+            localStorage.setItem("todos", JSON.stringify(todos));
+        } catch (error) {
+            console.error("Failed to save todos to localStorage", error);
+        }
+    }, [todos]);
+
+    // useCallback to prevent recreation of functions unnecessarily
+    const handleAddToDo = useCallback((task: string) => {
+        setTodos((prev) => [
             {
-                id:Math.random().toString(),
-                task:task,
-                completed:false,
-                createdAt:new Date()
+                id: Math.random().toString(36).substring(2, 9), // ID generation simplified
+                task,
+                completed: false,
+                createdAt: new Date()
             },
             ...prev
-          ] 
-        //   console.log("my previous " + prev);          
-        //   console.log(newTodos);       
-           localStorage.setItem("todos",JSON.stringify(newTodos))
-          return newTodos
-        })
-    }
+        ]);
+    }, []);
 
-    // mark compelted 
-    const toggleTodoAsCompleted = (id:string) => {
-        setTodos((prev) =>{
-            let newTodos = prev.map((todo) => {
-                if(todo.id === id){
-                    return { ...todo, completed:!todo.completed }
-                }
-                return todo;
-            })
-            localStorage.setItem("todos",JSON.stringify(newTodos))
-            return newTodos
-        })
-    }
+    const toggleTodoAsCompleted = useCallback((id: string) => {
+        setTodos((prev) =>
+            prev.map((todo) =>
+                todo.id === id ? { ...todo, completed: !todo.completed } : todo
+            )
+        );
+    }, []);
 
-    // delete the indivisual data 
-    const handleDeleteTodo = (id:string) => {
-        setTodos((prev) => {
-            let newTodos = prev.filter((filterTodo) => filterTodo.id !== id);
-            localStorage.setItem("todos",JSON.stringify(newTodos))
-            return newTodos;
-        })
-    }
+    const handleDeleteTodo = useCallback((id: string) => {
+        setTodos((prev) => prev.filter((todo) => todo.id !== id));
+    }, []);
 
+    // Memoize the context value to avoid unnecessary re-renders
+    const value = useMemo(
+        () => ({
+            todos,
+            handleAddToDo, 
+            toggleTodoAsCompleted, 
+            handleDeleteTodo, 
+        }),
+        [todos, handleAddToDo, toggleTodoAsCompleted, handleDeleteTodo]
+    );
 
-    return <todosContext.Provider value={{todos, handleAddToDo, toggleTodoAsCompleted,handleDeleteTodo}}>
-        {children}
-    </todosContext.Provider>
-}
+    return <TodosContext.Provider value={value}>{children}</TodosContext.Provider>;
+};
 
-// consumer 
+// Hook for accessing todos context
 export const useTodos = () => {
-    const todosConsumer = useContext(todosContext);
-    if(!todosConsumer){
-        throw new Error("useTodos used outside of Provider");
+    const context = useContext(TodosContext);
+    if (!context) {
+        throw new Error("useTodos must be used within a TodosProvider");
     }
-    return todosConsumer;
+    return context;
 }
