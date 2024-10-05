@@ -2,7 +2,7 @@
 
 A simple and elegant Todo application built with React and TypeScript. This application allows users to create, manage, and organize their tasks efficiently, with features like filtering tasks by status, marking tasks as completed, and deleting tasks.
 
-This Project is hosted at https://to-do-react-type-script-d2lggndo7-rezwan-rownoks-projects.vercel.app/
+This Project is hosted at https://to-do-react-type-script-lemon.vercel.app/
 
 ## Demo
 
